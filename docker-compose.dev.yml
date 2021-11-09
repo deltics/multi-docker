@@ -1,0 +1,53 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379  # Not required for the app, but allows use of redis-cli on the host to manage the redis service
+  nginx:
+    build:
+      dockerfile: dockerfile.dev
+      context: ./nginx
+    ports:
+      - 3050:80
+    restart: always
+    depends_on:
+      - api
+      - app
+  app:
+    build:
+      dockerfile: dockerfile.dev
+      context: ./app
+    volumes:
+      - /app/node_modules
+      - ./app:/app
+    stdin_open: true
+  api:
+    build:
+      dockerfile: dockerfile.dev
+      context: ./api
+    volumes:
+      - /app/node_modules
+      - ./api:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGDATABASE=postgres
+      - PGUSER=postgres
+      - PGPASSWORD=postgres_password
+  worker:
+    build:
+      dockerfile: dockerfile.dev
+      context: ./worker
+    volumes:
+      - /app/node_modules
+      - ./worker:/app
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379

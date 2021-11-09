@@ -21,3 +21,15 @@ after_success:
   - docker push deltics/s8-fib-app
   - docker push deltics/s8-fib-nginx
   - docker push deltics/s8-fib-worker
+
+deploy:
+  provider: elasticbeanstalk
+  region: us-west-2
+  app: s8-fib
+  env: s8fib-env
+  bucket_name: elasticbeanstalk-us-west-2-534848308234
+  bucket_path: s8-fib
+  on:
+    branch: master
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY

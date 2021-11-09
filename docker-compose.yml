@@ -1,53 +1,31 @@
 version: '3'
 services:
-  postgres:
-    image: postgres:latest
-    environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
-  redis:
-    image: redis:latest
-    ports:
-      - 6379:6379  # Not required for the app, but allows use of redis-cli on the host to manage the redis service
   nginx:
-    build:
-      dockerfile: dockerfile.dev
-      context: ./nginx
+    image: deltics/s8-fib-nginx
+    mem_limit: 128m
+    hostname: app
     ports:
-      - 3050:80
-    restart: always
-    depends_on:
-      - api
-      - app
+      - 80:80
   app:
-    build:
-      dockerfile: dockerfile.dev
-      context: ./app
-    volumes:
-      - /app/node_modules
-      - ./app:/app
-    stdin_open: true
+    image: deltics/s8-fib-app
+    mem_limit: 128m
+    hostname: app
   api:
-    build:
-      dockerfile: dockerfile.dev
-      context: ./api
-    volumes:
-      - /app/node_modules
-      - ./api:/app
+    image: deltics/s8-fib-api
+    mem_limit: 128m
+    hostname: api
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - PGHOST=postgres
-      - PGPORT=5432
-      - PGDATABASE=postgres
-      - PGUSER=postgres
-      - PGPASSWORD=postgres_password
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
+      - PGHOST=$PGHOST
+      - PGPORT=$PGPORT
+      - PGDATABASE=$PGDATABASE
+      - PGUSER=$PGUSER
+      - PGPASSWORD=$PGPASSWORD
   worker:
-    build:
-      dockerfile: dockerfile.dev
-      context: ./worker
-    volumes:
-      - /app/node_modules
-      - ./worker:/app
+    image: deltics/s8-fib-worker
+    mem_limit: 128m
+    hostname: worker
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - REDIS_HOST=$REDIS_HOST
+      - REDIS_PORT=$REDIS_PORT
