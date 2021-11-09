@@ -3,7 +3,7 @@ services:
   nginx:
     image: deltics/s8-fib-nginx
     mem_limit: 128m
-    hostname: app
+    hostname: nginx
     ports:
       - 80:80
   app:
